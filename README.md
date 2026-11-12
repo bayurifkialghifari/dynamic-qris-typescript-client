@@ -6,6 +6,8 @@
 
 Client TypeScript modular untuk Dynamic QRIS Gateway. Mendukung ShopeePay, GoPay, banyak akun provider, QRIS dengan idempotency key, dan long-poll pembayaran. Runtime menggunakan native fetch tanpa dependency produksi; tersedia ESM, CommonJS, serta deklarasi TypeScript.
 
+Untuk mulai menggunakan SDK, daftar melalui [website Karuhun QRIS](https://qris.karuhundeveloper.com/) atau langsung buka [bot Telegram @karuhunqris_bot](https://t.me/karuhunqris_bot) untuk mendapatkan API key merchant. Panduan endpoint tersedia di [dokumentasi API](https://qris.karuhundeveloper.com/reference#description/introduction).
+
 ## Instalasi
 
 Node.js 22+. Jalankan SDK di backend agar API key tetap di server.
@@ -22,7 +24,7 @@ Perintah ini tersedia setelah paket dipublish ke npm.
 import { DynamicQrisClient } from "@bayurifkialgh/dynamic-qris-client";
 
 const client = new DynamicQrisClient({
-  baseUrl: process.env.DYNAMIC_QRIS_BASE_URL ?? "http://localhost:4000",
+  baseUrl: "https://qris.karuhundeveloper.com",
   apiKey: process.env.DYNAMIC_QRIS_API_KEY!,
 });
 
@@ -155,4 +157,4 @@ npm run format:check
 npm pack --dry-run
 ```
 
-Test menggunakan fixture gateway dan fetch fake. Contoh checkout ada di [examples/checkout.ts](examples/checkout.ts); [panduan pengembangan SDK](docs/maintenance.md), [CHANGELOG](CHANGELOG.md), [MIT License](LICENSE).
+Test menggunakan fixture dan fetch fake. Contoh checkout ada di [examples/checkout.ts](examples/checkout.ts); [panduan pengembangan SDK](docs/maintenance.md), [CHANGELOG](CHANGELOG.md), [MIT License](LICENSE).
