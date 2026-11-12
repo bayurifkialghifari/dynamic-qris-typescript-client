@@ -1,0 +1,220 @@
+{
+  "meta": {
+    "provider": "shopee",
+    "label": "store",
+    "provider_selector": "shopee:store"
+  },
+  "account": {
+    "success": true,
+    "data": {
+      "user_id": "123",
+      "username": "merchant",
+      "first_name": "Merchant",
+      "api_key": "test-key",
+      "has_shopee_token": true,
+      "has_qris_static": true,
+      "token_valid": true,
+      "active_provider": "shopee",
+      "active_provider_label": "store",
+      "active_provider_selector": "shopee:store",
+      "providers": [
+        {
+          "id": 1,
+          "provider": "shopee",
+          "label": "store",
+          "provider_selector": "shopee:store",
+          "active": true,
+          "configured": true,
+          "has_qris_static": true,
+          "status": "valid",
+          "merchant_name": "Toko Contoh",
+          "merchant_city": "Jakarta"
+        }
+      ],
+      "is_active": true,
+      "balance": 10000,
+      "qris_creation_fee": 100
+    }
+  },
+  "qris": {
+    "success": true,
+    "data": {
+      "id": "a2b3c4d5e6f708192a3b4c5d6e7f8091",
+      "token": "qr_example",
+      "qris_url": "http://localhost:4000/qr/a2b3c4d5e6f708192a3b4c5d6e7f8091",
+      "qris_string": "000201010212",
+      "amount": 10001,
+      "requested_amount": 10000,
+      "unique_code": 1,
+      "creation_fee": 100,
+      "balance_remaining": 9900,
+      "expires_at": "2026-11-12T04:15:00.000Z",
+      "expires_in_seconds": 900,
+      "idempotent_replay": false,
+      "provider": "shopee",
+      "label": "store",
+      "provider_selector": "shopee:store"
+    }
+  },
+  "paid": {
+    "success": true,
+    "paid": true,
+    "status": "success",
+    "provider": "shopee",
+    "label": "store",
+    "provider_selector": "shopee:store",
+    "data": {
+      "token": "qr_example",
+      "amount": 10001,
+      "provider": "shopee",
+      "label": "store",
+      "provider_selector": "shopee:store",
+      "transaction": {
+        "transactionId": "TX-001",
+        "amount": 10001,
+        "status": "success",
+        "time": "2026-11-12 10:00:00",
+        "issuer": "Bank QRIS",
+        "timestamp": 1794452400,
+        "provider": "shopee",
+        "label": "store",
+        "provider_selector": "shopee:store"
+      }
+    },
+    "transaction": {
+      "transactionId": "TX-001",
+      "amount": 10001,
+      "status": "success",
+      "time": "2026-11-12 10:00:00",
+      "issuer": "Bank QRIS",
+      "timestamp": 1794452400,
+      "provider": "shopee",
+      "label": "store",
+      "provider_selector": "shopee:store"
+    }
+  },
+  "pending": {
+    "success": true,
+    "paid": false,
+    "status": "pending",
+    "provider": "shopee",
+    "label": "store",
+    "provider_selector": "shopee:store",
+    "data": {
+      "token": "qr_example",
+      "amount": 10001,
+      "provider": "shopee",
+      "label": "store",
+      "provider_selector": "shopee:store",
+      "expires_at": "2026-11-12T04:15:00.000Z"
+    }
+  },
+  "expired": {
+    "success": true,
+    "paid": false,
+    "status": "expired",
+    "provider": "shopee",
+    "label": "store",
+    "provider_selector": "shopee:store",
+    "data": {
+      "token": "qr_example",
+      "amount": 10001,
+      "provider": "shopee",
+      "label": "store",
+      "provider_selector": "shopee:store",
+      "expires_at": "2026-11-12T04:15:00.000Z"
+    }
+  },
+  "transactions": {
+    "success": true,
+    "provider": "shopee",
+    "label": "store",
+    "provider_selector": "shopee:store",
+    "total_amount": "10001",
+    "data": {
+      "provider": "shopee",
+      "label": "store",
+      "provider_selector": "shopee:store",
+      "transactions": [
+        {
+          "transactionId": "TX-001",
+          "amount": 10001,
+          "status": "success",
+          "time": "2026-11-12 10:00:00",
+          "issuer": "Bank QRIS",
+          "timestamp": 1794452400,
+          "provider": "shopee",
+          "label": "store",
+          "provider_selector": "shopee:store"
+        }
+      ],
+      "next_position": "cursor/next+1",
+      "total": 1
+    }
+  },
+  "allTransactions": {
+    "success": true,
+    "provider": "shopee",
+    "label": "store",
+    "provider_selector": "shopee:store",
+    "total_amount": "10001",
+    "data": {
+      "provider": "shopee",
+      "label": "store",
+      "provider_selector": "shopee:store",
+      "transactions": [
+        {
+          "transactionId": "TX-001",
+          "amount": 10001,
+          "status": "success",
+          "time": "2026-11-12 10:00:00",
+          "issuer": "Bank QRIS",
+          "timestamp": 1794452400,
+          "provider": "shopee",
+          "label": "store",
+          "provider_selector": "shopee:store"
+        }
+      ],
+      "period": "2026-11-01 s/d 2026-11-12",
+      "total_count": 1
+    }
+  },
+  "tokenStatus": {
+    "success": false,
+    "data": {
+      "provider": "shopee",
+      "label": "store",
+      "provider_selector": "shopee:store",
+      "token_status": "invalid",
+      "message": "Provider credentials expired"
+    }
+  },
+  "tokenUpdate": {
+    "success": true,
+    "data": {
+      "message": "Token updated",
+      "provider": "shopee",
+      "label": "store",
+      "provider_selector": "shopee:store"
+    }
+  },
+  "health": {
+    "success": true,
+    "name": "Dynamic QRIS",
+    "version": "fixture-version",
+    "message": "Healthy",
+    "timestamp": "2026-11-12T04:00:00.000Z",
+    "uptime_seconds": 42
+  },
+  "ready": {
+    "success": true,
+    "database": "ready",
+    "timestamp": "2026-11-12T04:00:00.000Z"
+  },
+  "logs": {
+    "success": true,
+    "data": {
+      "logs": []
+    }
+  }
+}
