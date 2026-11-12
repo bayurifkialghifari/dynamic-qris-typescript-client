@@ -1,5 +1,5 @@
 {
-  "name": "@bayurifkialghifari/dynamic-qris-client",
+  "name": "@bayurifkialgh/dynamic-qris-client",
   "version": "0.1.0",
   "description": "Typed client for the Dynamic QRIS ShopeePay and GoPay gateway",
   "license": "MIT",

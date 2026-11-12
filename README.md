@@ -7,7 +7,7 @@ Client TypeScript modular untuk Dynamic QRIS Gateway. Mendukung ShopeePay, GoPay
 Node.js 22+. Jalankan SDK di backend agar API key tetap di server.
 
 ```bash
-npm install @bayurifkialghifari/dynamic-qris-client
+npm install @bayurifkialgh/dynamic-qris-client
 ```
 
 Perintah ini tersedia setelah paket dipublish ke npm.
@@ -15,7 +15,7 @@ Perintah ini tersedia setelah paket dipublish ke npm.
 ## Quick start
 
 ```ts
-import { DynamicQrisClient } from "@bayurifkialghifari/dynamic-qris-client";
+import { DynamicQrisClient } from "@bayurifkialgh/dynamic-qris-client";
 
 const client = new DynamicQrisClient({
   baseUrl: process.env.DYNAMIC_QRIS_BASE_URL ?? "http://localhost:4000",
@@ -40,9 +40,7 @@ if (result.paid) {
 CommonJS juga didukung:
 
 ```js
-const {
-  DynamicQrisClient,
-} = require("@bayurifkialghifari/dynamic-qris-client");
+const { DynamicQrisClient } = require("@bayurifkialgh/dynamic-qris-client");
 ```
 
 ## Modul
@@ -124,7 +122,7 @@ Timestamp query memakai Unix detik. total_amount dipertahankan sebagai string. t
 ClientOptions: baseUrl, apiKey opsional untuk public endpoint, timeoutMs (default 30000), serta fetch opsional untuk transport kustom. baseUrl dapat memiliki prefix reverse proxy. RequestOptions: apiKey, timeoutMs, signal, idempotencyKey, shopeeToken. Override API key berlaku hanya pada request tersebut. shopeeToken mengirim x-shopee-token untuk pengecekan QRIS ShopeePay.
 
 ```ts
-import { DynamicQrisError } from "@bayurifkialghifari/dynamic-qris-client";
+import { DynamicQrisError } from "@bayurifkialgh/dynamic-qris-client";
 
 try {
   await client.qris.create({ amount: 10000 }, { idempotencyKey: "order-456" });
