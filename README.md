@@ -2,27 +2,15 @@
 
 Client TypeScript modular untuk Dynamic QRIS Gateway. Mendukung ShopeePay, GoPay, banyak akun provider, QRIS dengan idempotency key, dan long-poll pembayaran. Runtime menggunakan native fetch tanpa dependency produksi; tersedia ESM, CommonJS, serta deklarasi TypeScript.
 
-## Persyaratan dan instalasi lokal
+## Instalasi
 
 Node.js 22+. Jalankan SDK di backend agar API key tetap di server.
 
-Dari repository SDK:
-
 ```bash
-git clone https://github.com/bayurifkialghifari/dynamic-qris-typescript-client.git
-cd dynamic-qris-typescript-client
-npm ci
-npm run build
-npm pack
+npm install @bayurifkialghifari/dynamic-qris-client
 ```
 
-Di proyek pemakai, install file .tgz yang dihasilkan:
-
-```bash
-npm install /path/to/generated-package.tgz
-```
-
-Paket belum dipublish ke npm. Identitas paketnya adalah @bayurifkialghifari/dynamic-qris-client.
+Perintah ini tersedia setelah paket dipublish ke npm.
 
 ## Quick start
 
