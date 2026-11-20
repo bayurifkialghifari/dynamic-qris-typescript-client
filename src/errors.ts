@@ -17,3 +17,14 @@ export class DynamicQrisTransportError extends DynamicQrisError {
     this.name = "DynamicQrisTransportError";
   }
 }
+
+/** Webhook HMAC-SHA256 signature verification failed. */
+export class WebhookSignatureVerificationError extends DynamicQrisError {
+  constructor(
+    message = "Invalid webhook signature",
+    public readonly signature?: string,
+  ) {
+    super(message, 401);
+    this.name = "WebhookSignatureVerificationError";
+  }
+}

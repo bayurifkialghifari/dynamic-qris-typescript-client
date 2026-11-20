@@ -3,6 +3,8 @@ import {
   DynamicQrisClient,
   DynamicQrisError,
   DynamicQrisTransportError,
+  WebhookSignatureVerificationError,
+  Webhook,
 } from "../src";
 import fixture from "./fixtures/gateway.json";
 
@@ -358,5 +360,130 @@ describe("HTTP timeout and cancellation", () => {
     ).rejects.toMatchObject({ message: "Request cancelled" });
     controller.abort();
     await assertion;
+  });
+});
+
+describe("custom provider and extended qris create", () => {
+  it("supports custom provider and callback_url with products", async () => {
+    const responsePayload = {
+      success: true,
+      data: {
+        ...fixture.qris.data,
+        provider: "custom",
+        label: "dana-1",
+        provider_selector: "custom:dana-1",
+        callback_url: "https://my-store.example/api/webhook",
+        payment_url: "https://gateway.example/pay/qr_example",
+        total_amount: 10001,
+      },
+    };
+    const { client, fetcher } = setup(responsePayload);
+    const result = await client.qris.create({
+      amount: 10000,
+      provider: "custom:dana-1",
+      callback_url: "https://my-store.example/api/webhook",
+      products: [{ name: "Product A", price: 10000, quantity: 1 }],
+      expires_in_minutes: 30,
+    });
+
+    expect(result.provider).toBe("custom");
+    expect(result.callback_url).toBe("https://my-store.example/api/webhook");
+    expect(result.payment_url).toBe("https://gateway.example/pay/qr_example");
+
+    const sent = JSON.parse(String(request(fetcher).init.body));
+    expect(sent.provider).toBe("custom:dana-1");
+    expect(sent.callback_url).toBe("https://my-store.example/api/webhook");
+    expect(sent.expires_in_minutes).toBe(30);
+  });
+
+  it("rejects invalid callback_url format", () => {
+    const { client } = setup();
+    expect(() =>
+      client.qris.create({
+        amount: 10000,
+        callback_url: "not-a-valid-url",
+      }),
+    ).toThrow("callback_url must be an HTTP(S) URL");
+  });
+});
+
+describe("webhook signature, idempotency and event handling", () => {
+  const secret = "whsec_test_secret_1234567890abcdef";
+  const payload = JSON.stringify({
+    event: "payment.success",
+    token: "tok_test_123",
+    status: "success",
+    amount: 10000,
+    unique_code: 1,
+    total_amount: 10001,
+    description: null,
+    products: null,
+    issuer: "ShopeePay",
+    transaction_id: "TX-999",
+    paid_at: "2026-11-20T05:00:00.000Z",
+    created_at: "2026-11-20T04:45:00.000Z",
+  });
+
+  it("generates and verifies valid sha256= signature", () => {
+    const signature = Webhook.sign(payload, secret);
+    expect(signature.startsWith("sha256=")).toBe(true);
+    expect(Webhook.verifySignature(payload, signature, secret)).toBe(true);
+
+    // Also accepts plain hex
+    const plainHex = signature.replace("sha256=", "");
+    expect(Webhook.verifySignature(payload, plainHex, secret)).toBe(true);
+  });
+
+  it("detects tampered payload or incorrect secret", () => {
+    const signature = Webhook.sign(payload, secret);
+    const tampered = payload.replace("10001", "99999");
+    expect(Webhook.verifySignature(tampered, signature, secret)).toBe(false);
+    expect(Webhook.verifySignature(payload, signature, "wrong_secret")).toBe(
+      false,
+    );
+    expect(Webhook.verifySignature(payload, "invalid_sig", secret)).toBe(false);
+  });
+
+  it("constructs typed WebhookEvent on valid signature", () => {
+    const signature = Webhook.sign(payload, secret);
+    const deliveryId = "del_uuid_12345";
+    const event = Webhook.constructEvent(
+      payload,
+      signature,
+      secret,
+      deliveryId,
+    );
+
+    expect(event.event).toBe("payment.success");
+    expect(event.deliveryId).toBe(deliveryId);
+    expect(event.payload.token).toBe("tok_test_123");
+    expect(event.payload.total_amount).toBe(10001);
+  });
+
+  it("throws WebhookSignatureVerificationError on invalid signature in constructEvent", () => {
+    expect(() =>
+      Webhook.constructEvent(payload, "sha256=bad_signature", secret),
+    ).toThrow(WebhookSignatureVerificationError);
+  });
+
+  it("verifies idempotency delivery key with Set and callback", async () => {
+    const seen = new Set<string>();
+    expect(await Webhook.verifyDelivery("del_1", seen)).toBe(true);
+    expect(await Webhook.verifyDelivery("del_1", seen)).toBe(false); // Duplicate!
+    expect(await Webhook.verifyDelivery("del_2", seen)).toBe(true);
+
+    const asyncSeen = new Set<string>(["del_existing"]);
+    const isProcessed = async (id: string) => asyncSeen.has(id);
+    expect(await Webhook.verifyDelivery("del_existing", isProcessed)).toBe(
+      false,
+    );
+    expect(await Webhook.verifyDelivery("del_fresh", isProcessed)).toBe(true);
+  });
+
+  it("is accessible via client.webhook instance", () => {
+    const { client } = setup();
+    expect(client.webhook).toBeDefined();
+    const sig = client.webhook.sign(payload, secret);
+    expect(client.webhook.verifySignature(payload, sig, secret)).toBe(true);
   });
 });

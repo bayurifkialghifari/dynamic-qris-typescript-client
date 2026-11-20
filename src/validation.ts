@@ -29,9 +29,11 @@ export function provider(value: unknown, shopeeOnly = false): void {
   if (value === undefined) return;
   if (
     typeof value !== "string" ||
-    !/^(shopee|gopay)(:[a-z0-9_-]{1,64})?$/.test(value)
+    !/^(shopee|gopay|custom)(:[a-z0-9_-]{1,64})?$/.test(value)
   ) {
-    throw new TypeError("provider must be shopee, gopay, or kind:label");
+    throw new TypeError(
+      "provider must be shopee, gopay, custom, or kind:label",
+    );
   }
   if (shopeeOnly && !value.startsWith("shopee"))
     throw new TypeError("Token updates only support ShopeePay");
@@ -39,6 +41,17 @@ export function provider(value: unknown, shopeeOnly = false): void {
 export function validateCreate(input: CreateQrisRequest): void {
   integer(input.amount, "amount");
   provider(input.provider);
+  if (input.callback_url !== undefined) {
+    if (
+      typeof input.callback_url !== "string" ||
+      !/^https?:\/\//i.test(input.callback_url)
+    ) {
+      throw new TypeError("callback_url must be an HTTP(S) URL");
+    }
+  }
+  if (input.expires_in_minutes !== undefined) {
+    integer(input.expires_in_minutes, "expires_in_minutes");
+  }
 }
 export function validatePayment(input: CheckPaymentRequest): void {
   textValue(input.token, "token");

@@ -66,12 +66,66 @@ const { DynamicQrisClient } = require("@bayurifkialgh/dynamic-qris-client");
 | system.health(options?)                   | Health, tanpa autentikasi                                  |
 | system.ready(options?)                    | Readiness; HTTP 503 melempar error                         |
 | system.logs(options?)                     | Objek dengan logs, perlu API key                           |
+| webhook.verifySignature(body, sig, sec)   | Boolean verifikasi HMAC-SHA256 signature                   |
+| webhook.constructEvent(body, sig, sec)    | WebhookEvent ber-type dengan payload payment.success       |
+| webhook.verifyDelivery(id, setOrCb)       | Boolean idempotency check x-karuhun-delivery               |
 
 Nama field respons mengikuti API (snake_case dan transactionId). PaymentResult adalah discriminated union: ketika paid bernilai true, transaction tersedia dengan tipe yang pasti.
 
+## Webhooks
+
+Gateway otomatis mengirim HTTP POST `payment.success` saat QRIS terkonfirmasi lunas. Verifikasi signature dan idempotency key di backend Anda:
+
+```ts
+import {
+  Webhook,
+  WebhookSignatureVerificationError,
+} from "@bayurifkialgh/dynamic-qris-client";
+
+// Contoh Express / Fastify / Next.js API handler
+app.post(
+  "/api/webhook",
+  express.raw({ type: "application/json" }),
+  async (req, res) => {
+    const signature = req.headers["x-karuhun-signature"] as string;
+    const deliveryId = req.headers["x-karuhun-delivery"] as string;
+    const webhookSecret = process.env.DYNAMIC_QRIS_WEBHOOK_SECRET!;
+
+    try {
+      // 1. Verifikasi tanda tangan & parse payload ber-type
+      const event = Webhook.constructEvent(
+        req.body,
+        signature,
+        webhookSecret,
+        deliveryId,
+      );
+
+      // 2. Cegah double-order fulfillment via deliveryId (idempotency)
+      const isFresh = await Webhook.verifyDelivery(deliveryId, async (id) => {
+        return await db.processedWebhooks.exists(id);
+      });
+      if (!isFresh) {
+        return res.status(200).json({ received: true, duplicate: true });
+      }
+
+      // 3. Proses pesanan
+      const { token, total_amount, paid_at } = event.payload;
+      await orderService.markAsPaid(token, total_amount);
+
+      return res.status(200).json({ success: true });
+    } catch (err) {
+      if (err instanceof WebhookSignatureVerificationError) {
+        return res.status(401).send("Invalid webhook signature");
+      }
+      return res.status(400).send("Webhook error");
+    }
+  },
+);
+```
+
 ## Provider dan nominal
 
-Provider bisa shopee, gopay, atau selector akun seperti shopee:store / gopay:outlet_2. Label terdiri dari 1–64 huruf kecil, angka, underscore, atau strip. Jika provider kosong, gateway memilih akun aktif; pengecekan pembayaran tetap terikat pada akun pembuat QRIS.
+Provider bisa shopee, gopay, custom (misalnya: custom:dana-1, custom:bca-bisnis), atau selector akun seperti shopee:store / gopay:outlet_2. Label terdiri dari 1–64 huruf kecil, angka, underscore, atau strip. Jika provider kosong, gateway memilih akun aktif; pengecekan pembayaran tetap terikat pada akun pembuat QRIS.
 
 amount wajib integer Rupiah positif yang aman di JavaScript. requested_amount adalah nominal pesanan; amount pada respons QRIS sudah mencakup unique_code. Tampilkan amount tersebut kepada pembayar. creation_fee dipotong dari saldo merchant; baca account.qris_creation_fee untuk biaya aktual.
 

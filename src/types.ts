@@ -1,6 +1,12 @@
 /** Provider account selectors use the gateway's lowercase kind:label format. */
-export type Provider = "shopee" | "gopay";
+export type Provider = "shopee" | "gopay" | "custom";
 export type ProviderSelector = Provider | `${Provider}:${string}`;
+
+export interface ProductItem {
+  name: string;
+  price: number;
+  quantity: number;
+}
 
 export interface ProviderMetadata {
   provider: Provider;
@@ -38,7 +44,17 @@ export interface Account {
 export interface CreateQrisRequest {
   /** Positive integer Rupiah, before the gateway adds a unique code. */
   amount: number;
-  provider?: ProviderSelector;
+  provider?: ProviderSelector | undefined;
+  callback_url?: string | undefined;
+  custom_order_id?: string | undefined;
+  products?: ProductItem[] | undefined;
+  items?: ProductItem[] | undefined;
+  customer_name?: string | undefined;
+  customer_email?: string | undefined;
+  customer_phone?: string | undefined;
+  redirect_url?: string | undefined;
+  cancel_url?: string | undefined;
+  expires_in_minutes?: number | undefined;
 }
 export interface Qris extends ProviderMetadata {
   id: string;
@@ -53,6 +69,11 @@ export interface Qris extends ProviderMetadata {
   expires_at: string;
   expires_in_seconds: number;
   idempotent_replay: boolean;
+  callback_url?: string | null | undefined;
+  payment_url?: string | undefined;
+  qr_image_url?: string | undefined;
+  merchant_name?: string | undefined;
+  total_amount?: number | undefined;
 }
 export interface Transaction extends ProviderMetadata {
   transactionId: string;
@@ -161,4 +182,27 @@ export interface RequestOptions {
   signal?: AbortSignal;
   idempotencyKey?: string;
   shopeeToken?: string;
+}
+
+export interface WebhookPaymentPayload {
+  event: "payment.success" | string;
+  token: string;
+  status: "success" | string;
+  amount: number;
+  unique_code: number;
+  total_amount: number;
+  description: string | null;
+  products: ProductItem[] | null;
+  issuer: string | null;
+  transaction_id: string | null;
+  paid_at: string;
+  created_at: string;
+}
+
+export interface WebhookEvent<T = WebhookPaymentPayload> {
+  event: string;
+  deliveryId?: string | undefined;
+  signature: string;
+  payload: T;
+  rawBody: string;
 }
