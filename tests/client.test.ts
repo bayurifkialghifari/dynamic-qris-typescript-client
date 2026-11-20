@@ -364,7 +364,7 @@ describe("HTTP timeout and cancellation", () => {
 });
 
 describe("custom provider and extended qris create", () => {
-  it("supports custom provider and callback_url with products", async () => {
+  it("supports custom provider, description, callback_url and products", async () => {
     const responsePayload = {
       success: true,
       data: {
@@ -373,27 +373,29 @@ describe("custom provider and extended qris create", () => {
         label: "dana-1",
         provider_selector: "custom:dana-1",
         callback_url: "https://my-store.example/api/webhook",
-        payment_url: "https://gateway.example/pay/qr_example",
-        total_amount: 10001,
+        payment_link: "https://gateway.example/pay/qr_example",
+        description: "Order #123",
+        products: [{ name: "Product A", price: 10000, qty: 1 }],
       },
     };
     const { client, fetcher } = setup(responsePayload);
     const result = await client.qris.create({
       amount: 10000,
       provider: "custom:dana-1",
+      description: "Order #123",
       callback_url: "https://my-store.example/api/webhook",
-      products: [{ name: "Product A", price: 10000, quantity: 1 }],
-      expires_in_minutes: 30,
+      products: [{ name: "Product A", price: 10000, qty: 1 }],
     });
 
     expect(result.provider).toBe("custom");
     expect(result.callback_url).toBe("https://my-store.example/api/webhook");
-    expect(result.payment_url).toBe("https://gateway.example/pay/qr_example");
+    expect(result.payment_link).toBe("https://gateway.example/pay/qr_example");
+    expect(result.description).toBe("Order #123");
 
     const sent = JSON.parse(String(request(fetcher).init.body));
     expect(sent.provider).toBe("custom:dana-1");
     expect(sent.callback_url).toBe("https://my-store.example/api/webhook");
-    expect(sent.expires_in_minutes).toBe(30);
+    expect(sent.description).toBe("Order #123");
   });
 
   it("rejects invalid callback_url format", () => {

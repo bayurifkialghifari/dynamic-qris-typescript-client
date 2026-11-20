@@ -5,8 +5,8 @@
 - Add `WebhookModule` and `Webhook` utility for verifying HMAC-SHA256 signatures (`x-karuhun-signature`), parsing typed events (`constructEvent`), and checking idempotency keys (`verifyDelivery`).
 - Add `WebhookSignatureVerificationError` error class.
 - Support `custom` provider accounts (e.g. `custom:dana-1`, `custom:bca-bisnis`) alongside ShopeePay and GoPay.
-- Support extended `POST /v1/qris/create` fields: `callback_url`, `products`, `items`, `custom_order_id`, `customer_name`, `customer_email`, `customer_phone`, `redirect_url`, `cancel_url`, and `expires_in_minutes`.
-- Add `callback_url`, `payment_url`, `qr_image_url`, `total_amount`, and `merchant_name` to `Qris` response interface.
+- Support `POST /v1/qris/create` fields: `amount`, `provider`, `description`, `products` (items with `name`, `price`, `qty`), and `callback_url`.
+- Add `payment_link`, `callback_url`, `description`, and `products` to `Qris` response interface.
 
 ## 0.1.1
 

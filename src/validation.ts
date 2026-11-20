@@ -49,9 +49,6 @@ export function validateCreate(input: CreateQrisRequest): void {
       throw new TypeError("callback_url must be an HTTP(S) URL");
     }
   }
-  if (input.expires_in_minutes !== undefined) {
-    integer(input.expires_in_minutes, "expires_in_minutes");
-  }
 }
 export function validatePayment(input: CheckPaymentRequest): void {
   textValue(input.token, "token");

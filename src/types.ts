@@ -5,7 +5,7 @@ export type ProviderSelector = Provider | `${Provider}:${string}`;
 export interface ProductItem {
   name: string;
   price: number;
-  quantity: number;
+  qty: number;
 }
 
 export interface ProviderMetadata {
@@ -45,20 +45,17 @@ export interface CreateQrisRequest {
   /** Positive integer Rupiah, before the gateway adds a unique code. */
   amount: number;
   provider?: ProviderSelector | undefined;
-  callback_url?: string | undefined;
-  custom_order_id?: string | undefined;
+  description?: string | undefined;
   products?: ProductItem[] | undefined;
-  items?: ProductItem[] | undefined;
-  customer_name?: string | undefined;
-  customer_email?: string | undefined;
-  customer_phone?: string | undefined;
-  redirect_url?: string | undefined;
-  cancel_url?: string | undefined;
-  expires_in_minutes?: number | undefined;
+  callback_url?: string | undefined;
 }
 export interface Qris extends ProviderMetadata {
   id: string;
   token: string;
+  payment_link?: string | undefined;
+  callback_url?: string | null | undefined;
+  description?: string | null | undefined;
+  products?: ProductItem[] | null | undefined;
   qris_url: string;
   qris_string: string;
   amount: number;
@@ -69,11 +66,6 @@ export interface Qris extends ProviderMetadata {
   expires_at: string;
   expires_in_seconds: number;
   idempotent_replay: boolean;
-  callback_url?: string | null | undefined;
-  payment_url?: string | undefined;
-  qr_image_url?: string | undefined;
-  merchant_name?: string | undefined;
-  total_amount?: number | undefined;
 }
 export interface Transaction extends ProviderMetadata {
   transactionId: string;
