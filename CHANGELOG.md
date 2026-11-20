@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1
+
+- Align `CreateQrisRequest` and `Qris` types strictly with gateway OpenAPI specification.
+- Release version bump.
+
 ## 0.2.0
 
 - Add `WebhookModule` and `Webhook` utility for verifying HMAC-SHA256 signatures (`x-karuhun-signature`), parsing typed events (`constructEvent`), and checking idempotency keys (`verifyDelivery`).
