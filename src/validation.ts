@@ -1,6 +1,7 @@
 import type {
   CheckPaymentRequest,
   CreateQrisRequest,
+  CreateTransactionRequest,
   TransactionsQuery,
 } from "./types";
 
@@ -29,16 +30,18 @@ export function provider(value: unknown, shopeeOnly = false): void {
   if (value === undefined) return;
   if (
     typeof value !== "string" ||
-    !/^(shopee|gopay|custom)(:[a-z0-9_-]{1,64})?$/.test(value)
+    !/^(shopee|gopay|custom|bank_transfer)(:[a-z0-9_-]{1,64})?$/.test(value)
   ) {
     throw new TypeError(
-      "provider must be shopee, gopay, custom, or kind:label",
+      "provider must be shopee, gopay, custom, bank_transfer, or kind:label",
     );
   }
   if (shopeeOnly && !value.startsWith("shopee"))
     throw new TypeError("Token updates only support ShopeePay");
 }
-export function validateCreate(input: CreateQrisRequest): void {
+export function validateTransactionCreate(
+  input: CreateTransactionRequest,
+): void {
   integer(input.amount, "amount");
   provider(input.provider);
   if (input.callback_url !== undefined) {
@@ -49,6 +52,9 @@ export function validateCreate(input: CreateQrisRequest): void {
       throw new TypeError("callback_url must be an HTTP(S) URL");
     }
   }
+}
+export function validateCreate(input: CreateQrisRequest): void {
+  validateTransactionCreate(input);
 }
 export function validatePayment(input: CheckPaymentRequest): void {
   textValue(input.token, "token");

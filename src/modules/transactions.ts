@@ -1,15 +1,28 @@
 import type {
   AllTransactionsResult,
+  CreateTransactionRequest,
+  CreatedTransaction,
   ProviderSelector,
   RequestOptions,
   TransactionsQuery,
   TransactionsResult,
 } from "../types";
 import type { Transport } from "../transport";
-import { provider, validateTransactions } from "../validation";
+import {
+  provider,
+  validateTransactionCreate,
+  validateTransactions,
+} from "../validation";
 
 export class TransactionsModule {
   constructor(private readonly transport: Transport) {}
+  create(
+    input: CreateTransactionRequest,
+    options?: RequestOptions,
+  ): Promise<CreatedTransaction> {
+    validateTransactionCreate(input);
+    return this.transport.request("POST", "/v1/transaction", input, options);
+  }
   list(
     query: TransactionsQuery = {},
     options?: RequestOptions,

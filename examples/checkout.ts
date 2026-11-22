@@ -6,12 +6,16 @@ export async function createCheckout(orderId: string, amount: number) {
     baseUrl: "https://qris.karuhundeveloper.com",
     apiKey: process.env.DYNAMIC_QRIS_API_KEY!,
   });
-  const qr = await client.qris.create({ amount }, { idempotencyKey: orderId });
-  // Persist qr.token with orderId. Show amount including the unique code.
+  const tx = await client.transaction.create(
+    { amount },
+    { idempotencyKey: orderId },
+  );
+  // Persist tx.token with orderId. Show amount including the unique code.
   return {
-    token: qr.token,
-    imageUrl: qr.qris_url,
-    amount: qr.amount,
-    expiresAt: qr.expires_at,
+    token: tx.token,
+    paymentType: tx.payment_type,
+    imageUrl: tx.qris_url,
+    amount: tx.amount,
+    expiresAt: tx.expires_at,
   };
 }

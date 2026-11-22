@@ -1,6 +1,7 @@
 /** Provider account selectors use the gateway's lowercase kind:label format. */
-export type Provider = "shopee" | "gopay" | "custom";
+export type Provider = "shopee" | "gopay" | "custom" | "bank_transfer";
 export type ProviderSelector = Provider | `${Provider}:${string}`;
+export type PaymentType = "qris" | "bank_transfer";
 
 export interface ProductItem {
   name: string;
@@ -41,6 +42,18 @@ export interface Account {
   balance: number;
   qris_creation_fee: number;
 }
+export interface CreateTransactionRequest {
+  /** Positive integer Rupiah, before the gateway adds a unique code. */
+  amount: number;
+  provider?: ProviderSelector | undefined;
+  description?: string | undefined;
+  products?: ProductItem[] | undefined;
+  callback_url?: string | undefined;
+}
+
+/**
+ * @deprecated Use `CreateTransactionRequest` with `client.transaction.create()` instead.
+ */
 export interface CreateQrisRequest {
   /** Positive integer Rupiah, before the gateway adds a unique code. */
   amount: number;
@@ -49,6 +62,32 @@ export interface CreateQrisRequest {
   products?: ProductItem[] | undefined;
   callback_url?: string | undefined;
 }
+
+export interface CreatedTransaction extends ProviderMetadata {
+  id: string;
+  token: string;
+  payment_type: PaymentType;
+  payment_link?: string | undefined;
+  callback_url?: string | null | undefined;
+  description?: string | null | undefined;
+  products?: ProductItem[] | null | undefined;
+  qris_url: string | null;
+  qris_string: string | null;
+  bank_name?: string | null | undefined;
+  bank_logo?: string | null | undefined;
+  account_number?: string | null | undefined;
+  account_holder_name?: string | null | undefined;
+  amount: number;
+  requested_amount: number;
+  unique_code: number;
+  creation_fee: number;
+  balance_remaining: number;
+  expires_at: string;
+  expires_in_seconds: number;
+  idempotent_replay: boolean;
+}
+
+export type TransactionCreateResponse = CreatedTransaction;
 export interface Qris extends ProviderMetadata {
   id: string;
   token: string;

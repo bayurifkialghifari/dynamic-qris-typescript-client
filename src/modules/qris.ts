@@ -4,7 +4,13 @@ import { integer, textValue, validateCreate } from "../validation";
 
 export class QrisModule {
   constructor(private readonly transport: Transport) {}
+  /**
+   * @deprecated Use `client.transaction.create()` (POST /v1/transaction) instead. `/v1/qris/create` is legacy.
+   */
   create(input: CreateQrisRequest, options?: RequestOptions): Promise<Qris> {
+    console.warn(
+      "[dynamic-qris] qris.create() is legacy and deprecated. Use transaction.create() (/v1/transaction) instead.",
+    );
     validateCreate(input);
     return this.transport.request("POST", "/v1/qris/create", input, options);
   }

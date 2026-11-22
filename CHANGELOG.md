@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0
+
+- Add `POST /v1/transaction` support via `TransactionModule` (`client.transaction.create()` and `client.transactions.create()`).
+- Add `CreateTransactionRequest` and `CreatedTransaction` types supporting QRIS and Bank Transfer payments (including bank account fields: `bank_name`, `bank_logo`, `account_number`, `account_holder_name`, and `payment_type`).
+- Support `bank_transfer` provider type (e.g. `bank_transfer:bca-utama`) in provider validation.
+- Deprecate `POST /v1/qris/create` (`client.qris.create()`) as legacy with runtime `console.warn` and `@deprecated` annotation while maintaining full backward compatibility.
+- Update documentation and examples to use `transaction.create()`.
+
 ## 0.2.1
 
 - Align `CreateQrisRequest` and `Qris` types strictly with gateway OpenAPI specification.

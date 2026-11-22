@@ -489,3 +489,143 @@ describe("webhook signature, idempotency and event handling", () => {
     expect(client.webhook.verifySignature(payload, sig, secret)).toBe(true);
   });
 });
+
+describe("transaction module and bank transfer support", () => {
+  const transactionQrisPayload = {
+    success: true,
+    data: {
+      id: "tx_qris_123",
+      token: "tok_tx_qris",
+      payment_type: "qris",
+      payment_link: "https://gateway.example/pay/tx_qris_123",
+      callback_url: "https://my-store.example/webhook",
+      description: "Order #INV-100",
+      products: [{ name: "Item 1", price: 10000, qty: 1 }],
+      qris_url: "https://gateway.example/qr/tx_qris_123",
+      qris_string: "0002010102126304A13F",
+      bank_name: null,
+      bank_logo: null,
+      account_number: null,
+      account_holder_name: null,
+      amount: 10001,
+      requested_amount: 10000,
+      unique_code: 1,
+      creation_fee: 100,
+      balance_remaining: 149900,
+      expires_at: "2026-10-19T03:30:30.000Z",
+      expires_in_seconds: 900,
+      idempotent_replay: false,
+      provider: "gopay",
+      label: "default",
+      provider_selector: "gopay:default",
+    },
+  };
+
+  const transactionBankTransferPayload = {
+    success: true,
+    data: {
+      id: "tx_bt_456",
+      token: "tok_tx_bt",
+      payment_type: "bank_transfer",
+      payment_link: "https://gateway.example/pay/tx_bt_456",
+      callback_url: "https://my-store.example/webhook",
+      description: "Order #INV-101",
+      products: null,
+      qris_url: null,
+      qris_string: null,
+      bank_name: "BCA",
+      bank_logo: "https://gateway.example/images/bca.svg",
+      account_number: "1234567890",
+      account_holder_name: "PT MAKMUR JAYA",
+      amount: 50001,
+      requested_amount: 50000,
+      unique_code: 1,
+      creation_fee: 100,
+      balance_remaining: 149900,
+      expires_at: "2026-10-19T03:30:30.000Z",
+      expires_in_seconds: 900,
+      idempotent_replay: false,
+      provider: "bank_transfer",
+      label: "bca-utama",
+      provider_selector: "bank_transfer:bca-utama",
+    },
+  };
+
+  it("creates QRIS transaction via client.transaction.create (POST /v1/transaction)", async () => {
+    const { client, fetcher } = setup(transactionQrisPayload, 201);
+    const result = await client.transaction.create(
+      {
+        amount: 10000,
+        provider: "gopay:default",
+        description: "Order #INV-100",
+        callback_url: "https://my-store.example/webhook",
+        products: [{ name: "Item 1", price: 10000, qty: 1 }],
+      },
+      { idempotencyKey: "idemp-tx-1" },
+    );
+
+    expect(result.id).toBe("tx_qris_123");
+    expect(result.payment_type).toBe("qris");
+    expect(result.qris_url).toBe("https://gateway.example/qr/tx_qris_123");
+    expect(request(fetcher).url.pathname).toBe("/proxy/v1/transaction");
+    expect(request(fetcher).headers.get("idempotency-key")).toBe("idemp-tx-1");
+    expect(request(fetcher).init.method).toBe("POST");
+  });
+
+  it("creates Bank Transfer transaction with bank account details", async () => {
+    const { client, fetcher } = setup(transactionBankTransferPayload, 201);
+    const result = await client.transaction.create({
+      amount: 50000,
+      provider: "bank_transfer:bca-utama",
+      description: "Order #INV-101",
+    });
+
+    expect(result.payment_type).toBe("bank_transfer");
+    expect(result.qris_url).toBeNull();
+    expect(result.qris_string).toBeNull();
+    expect(result.bank_name).toBe("BCA");
+    expect(result.account_number).toBe("1234567890");
+    expect(result.account_holder_name).toBe("PT MAKMUR JAYA");
+    expect(request(fetcher).url.pathname).toBe("/proxy/v1/transaction");
+  });
+
+  it("supports client.transactions.create alias", async () => {
+    const { client, fetcher } = setup(transactionQrisPayload, 201);
+    const result = await client.transactions.create({
+      amount: 10000,
+      provider: "gopay:default",
+    });
+    expect(result.id).toBe("tx_qris_123");
+    expect(request(fetcher).url.pathname).toBe("/proxy/v1/transaction");
+  });
+
+  it("emits console.warn when legacy client.qris.create is called", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const { client, fetcher } = setup(fixture.qris, 201);
+
+    const result = await client.qris.create({ amount: 10000 });
+    expect(result.token).toBe("qr_example");
+    expect(request(fetcher).url.pathname).toBe("/proxy/v1/qris/create");
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("qris.create() is legacy and deprecated"),
+    );
+    warnSpy.mockRestore();
+  });
+
+  it("accepts bank_transfer provider selector in validation", async () => {
+    const { client } = setup(transactionBankTransferPayload, 201);
+    await expect(
+      client.transaction.create({
+        amount: 50000,
+        provider: "bank_transfer",
+      }),
+    ).resolves.toBeDefined();
+
+    await expect(
+      client.transaction.create({
+        amount: 50000,
+        provider: "bank_transfer:mandiri-1",
+      }),
+    ).resolves.toBeDefined();
+  });
+});

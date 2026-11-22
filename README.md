@@ -31,13 +31,13 @@ const client = new DynamicQrisClient({
 const account = await client.account.get();
 console.log(account.balance, account.providers);
 
-const qr = await client.qris.create(
+const tx = await client.transaction.create(
   { amount: 10000, provider: "shopee:store" },
   { idempotencyKey: "order-123" },
 );
-console.log(qr.token, qr.qris_url, qr.amount);
+console.log(tx.token, tx.qris_url, tx.amount);
 
-const result = await client.payment.check({ token: qr.token });
+const result = await client.payment.check({ token: tx.token });
 if (result.paid) {
   console.log(result.transaction.transactionId, result.transaction.issuer);
 }
@@ -54,7 +54,8 @@ const { DynamicQrisClient } = require("@bayurifkialgh/dynamic-qris-client");
 | Method                                    | Hasil                                                      |
 | ----------------------------------------- | ---------------------------------------------------------- |
 | account.get(options?)                     | Account, termasuk saldo dan daftar provider                |
-| qris.create(input, options?)              | Qris; data envelope dibuka                                 |
+| transaction.create(input, options?)       | CreatedTransaction (QRIS / Bank Transfer)                  |
+| qris.create(input, options?)              | Qris (Legacy / Deprecated); data envelope dibuka           |
 | qris.url(id)                              | URL gambar tanpa HTTP request                              |
 | qris.raw(id, options?)                    | Payload QRIS string                                        |
 | qris.image(id, options?)                  | Uint8Array PNG                                             |
@@ -185,7 +186,10 @@ ClientOptions: baseUrl, apiKey opsional untuk public endpoint, timeoutMs (defaul
 import { DynamicQrisError } from "@bayurifkialgh/dynamic-qris-client";
 
 try {
-  await client.qris.create({ amount: 10000 }, { idempotencyKey: "order-456" });
+  await client.transaction.create(
+    { amount: 10000 },
+    { idempotencyKey: "order-456" },
+  );
 } catch (error) {
   if (error instanceof DynamicQrisError) {
     console.error(error.status, error.message);

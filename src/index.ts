@@ -1,6 +1,7 @@
 import type { ClientOptions } from "./types";
 import { Transport } from "./transport";
 import { AccountModule } from "./modules/account";
+import { TransactionModule } from "./modules/transaction";
 import { QrisModule } from "./modules/qris";
 import { PaymentModule } from "./modules/payment";
 import { TransactionsModule } from "./modules/transactions";
@@ -10,6 +11,7 @@ import { WebhookModule, Webhook } from "./modules/webhook";
 
 export class DynamicQrisClient {
   readonly account: AccountModule;
+  readonly transaction: TransactionModule;
   readonly qris: QrisModule;
   readonly payment: PaymentModule;
   readonly transactions: TransactionsModule;
@@ -20,6 +22,7 @@ export class DynamicQrisClient {
   constructor(options: ClientOptions) {
     const transport = new Transport(options);
     this.account = new AccountModule(transport);
+    this.transaction = new TransactionModule(transport);
     this.qris = new QrisModule(transport);
     this.payment = new PaymentModule(transport);
     this.transactions = new TransactionsModule(transport);
@@ -32,6 +35,7 @@ export * from "./types";
 export * from "./errors";
 export {
   AccountModule,
+  TransactionModule,
   QrisModule,
   PaymentModule,
   TransactionsModule,
